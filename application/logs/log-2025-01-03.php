@@ -1,0 +1,30 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+
+ERROR - 2025-01-03 11:20:38 --> Could not find the language line "settings_group_configure_features"
+ERROR - 2025-01-03 11:20:38 --> Could not find the language line "integrations"
+ERROR - 2025-01-03 11:20:38 --> Could not find the language line "settings_group_other"
+ERROR - 2025-01-03 11:20:38 --> Severity: error --> Exception: Unknown column 'status' in 'field list' C:\wamp64\www\amaze_crm\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-01-03 11:21:13 --> Could not find the language line "settings_group_configure_features"
+ERROR - 2025-01-03 11:21:13 --> Could not find the language line "integrations"
+ERROR - 2025-01-03 11:21:13 --> Could not find the language line "settings_group_other"
+ERROR - 2025-01-03 11:21:13 --> Could not find the language line "filters"
+ERROR - 2025-01-03 11:21:13 --> Could not find the language line "default_filter_info"
+ERROR - 2025-01-03 11:21:15 --> Could not find the language line "settings_group_configure_features"
+ERROR - 2025-01-03 11:21:15 --> Could not find the language line "integrations"
+ERROR - 2025-01-03 11:21:15 --> Could not find the language line "settings_group_other"
+ERROR - 2025-01-03 11:21:15 --> Severity: error --> Exception: Unknown column 'tax2' in 'field list' C:\wamp64\www\amaze_crm\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-01-03 11:21:15 --> Could not find the language line "settings_group_configure_features"
+ERROR - 2025-01-03 11:21:15 --> Could not find the language line "integrations"
+ERROR - 2025-01-03 11:21:15 --> Could not find the language line "settings_group_other"
+ERROR - 2025-01-03 11:21:25 --> Could not find the language line "settings_group_configure_features"
+ERROR - 2025-01-03 11:21:25 --> Could not find the language line "integrations"
+ERROR - 2025-01-03 11:21:25 --> Could not find the language line "settings_group_other"
+ERROR - 2025-01-03 11:21:25 --> Could not find the language line "filters"
+ERROR - 2025-01-03 11:21:25 --> Could not find the language line "default_filter_info"
+ERROR - 2025-01-03 11:21:26 --> Could not find the language line "settings_group_configure_features"
+ERROR - 2025-01-03 11:21:26 --> Could not find the language line "integrations"
+ERROR - 2025-01-03 11:21:26 --> Could not find the language line "settings_group_other"
+ERROR - 2025-01-03 11:21:26 --> Severity: error --> Exception: Unknown column 'tax2' in 'field list' C:\wamp64\www\amaze_crm\system\database\drivers\mysqli\mysqli_driver.php 307
+ERROR - 2025-01-03 11:21:27 --> Could not find the language line "settings_group_configure_features"
+ERROR - 2025-01-03 11:21:27 --> Could not find the language line "integrations"
+ERROR - 2025-01-03 11:21:27 --> Could not find the language line "settings_group_other"

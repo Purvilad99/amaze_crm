@@ -11,22 +11,20 @@ return App_table::find('expenses')
         $aColumns = [
             '1', // bulk actions
             db_prefix() . 'expenses.id as id',
-            db_prefix() . 'expenses_categories.name as category_name',
-            'amount',
-            'expense_name',
-            'file_name',
+            'category',
+            'total_amount',
+            'employee',
+            'type',
             'date',
-            db_prefix() . 'projects.name as project_name',
-            get_sql_select_client_company(),
-            'invoiceid',
-            'reference_no',
             'paymentmode',
+            'status',
         ];
 
         $join = [
-            'LEFT JOIN ' . db_prefix() . 'clients ON ' . db_prefix() . 'clients.userid = ' . db_prefix() . 'expenses.clientid',
-            'JOIN ' . db_prefix() . 'expenses_categories ON ' . db_prefix() . 'expenses_categories.id = ' . db_prefix() . 'expenses.category',
-            'LEFT JOIN ' . db_prefix() . 'projects ON ' . db_prefix() . 'projects.id = ' . db_prefix() . 'expenses.project_id',
+//            'LEFT JOIN ' . db_prefix() . 'clients ON ' . db_prefix() . 'clients.userid = ' . db_prefix() . 'expenses.clientid',
+            'LEFT JOIN ' . db_prefix() . 'staff ON ' . db_prefix() . 'staff.staffid = ' . db_prefix() . 'expenses.employee',
+//            'JOIN ' . db_prefix() . 'expenses_categories ON ' . db_prefix() . 'expenses_categories.id = ' . db_prefix() . 'expenses.category',
+//            'LEFT JOIN ' . db_prefix() . 'projects ON ' . db_prefix() . 'projects.id = ' . db_prefix() . 'expenses.project_id',
             'LEFT JOIN ' . db_prefix() . 'files ON ' . db_prefix() . 'files.rel_id = ' . db_prefix() . 'expenses.id AND rel_type="expense"',
             'LEFT JOIN ' . db_prefix() . 'currencies ON ' . db_prefix() . 'currencies.id = ' . db_prefix() . 'expenses.currency',
         ];
@@ -40,15 +38,15 @@ return App_table::find('expenses')
             array_push($join, 'LEFT JOIN ' . db_prefix() . 'customfieldsvalues as ctable_' . $key . ' ON ' . db_prefix() . 'expenses.id = ctable_' . $key . '.relid AND ctable_' . $key . '.fieldto="' . $field['fieldto'] . '" AND ctable_' . $key . '.fieldid=' . $field['id']);
         }
 
-        $where = [];
+        $where  = [];
 
         if ($filtersWhere = $this->getWhereFromRules()) {
             $where[] = $filtersWhere;
         }
 
-        if ($clientid != '') {
+        /*if ($clientid != '') {
             array_push($where, 'AND ' . db_prefix() . 'expenses.clientid=' . $this->ci->db->escape_str($clientid));
-        }
+        }*/
 
         if (staff_cant('view', 'expenses')) {
             array_push($where, 'AND ' . db_prefix() . 'expenses.addedfrom=' . get_staff_user_id());
@@ -66,115 +64,88 @@ return App_table::find('expenses')
 
         $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
             'billable',
-            db_prefix() . 'currencies.name as currency_name',
-            db_prefix() . 'expenses.clientid',
+            db_prefix() . 'currencies.symbol as currency_symbol',
+//            db_prefix() . 'expenses.clientid',
+            db_prefix() . 'expenses.employee',
             'tax',
-            'tax2',
-            'project_id',
-            'recurring',
+//            'tax2',
+//            'project_id',
+//            'recurring',
         ]);
         $output  = $result['output'];
         $rResult = $result['rResult'];
 
         $this->ci->load->model('payment_modes_model');
+//        echo "<pre>"; print_r($rResult); exit;
 
         foreach ($rResult as $aRow) {
             $row = [];
 
-            $row[] = '<div class="checkbox"><input type="checkbox" value="' . $aRow['id'] . '"><label></label></div>';
+            if($aRow['status'] == 0){
+                $row[] = '<div class="checkbox"><input type="checkbox" id="expense_approve" name="approve[]" value="' . $aRow['id'] . '"><label></label></div>';
+            }else{
+                $row[] = '';
+            }
 
             $row[] = $aRow['id'];
 
             $categoryOutput = '';
 
-            if (is_numeric($clientid)) {
-                $categoryOutput = '<a href="' . admin_url('expenses/list_expenses/' . $aRow['id']) . '" class="tw-font-medium">' . e($aRow['category_name']) . '</a>';
-            } else {
-                $categoryOutput = '<a href="' . admin_url('expenses/list_expenses/' . $aRow['id']) . '" onclick="init_expense(' . $aRow['id'] . ');return false;" class="tw-font-medium">' . e($aRow['category_name']) . '</a>';
-            }
-
-            if ($aRow['billable'] == 1) {
-                if ($aRow['invoiceid'] == null) {
-                    $categoryOutput .= ' <p class="text-danger tw-text-sm tw-mb-1 tw-font-medium">' . _l('expense_list_unbilled') . '</p>';
-                } else {
-                    if (total_rows(db_prefix() . 'invoices', [
-                        'id'     => $aRow['invoiceid'],
-                        'status' => 2,
-                    ]) > 0) {
-                        $categoryOutput .= ' <p class="text-success tw-text-sm tw-mb-1 tw-font-medium">' . _l('expense_list_billed') . '</p>';
-                    } else {
-                        $categoryOutput .= ' <p class="text-success tw-text-sm tw-mb-1 tw-font-medium">' . _l('expense_list_invoice') . '</p>';
-                    }
-                }
-            }
-
-            if ($aRow['recurring'] == 1) {
-                $categoryOutput .= '<span class="label label-primary"> ' . _l('expense_recurring_indicator') . '</span>';
-            }
+            $categoryOutput .=  $aRow['category'] ;
 
             $categoryOutput .= '<div class="row-options">';
 
-            $categoryOutput .= '<a href="' . admin_url('expenses/list_expenses/' . $aRow['id']) . '" onclick="init_expense(' . $aRow['id'] . ');return false;">' . _l('view') . '</a>';
-
-            if (staff_can('edit', 'expenses')) {
-                $categoryOutput .= ' | <a href="' . admin_url('expenses/expense/' . $aRow['id']) . '">' . _l('edit') . '</a>';
+            if (staff_can('edit',  'expenses')) {
+                $categoryOutput .= ' <a href="' . admin_url('expenses/expense/' . $aRow['id']) . '">' . _l('edit') . '</a>';
             }
 
-            if (staff_can('delete', 'expenses')) {
-                $categoryOutput .= ' | <a href="' . admin_url('expenses/delete/' . $aRow['id']) . '" class="_delete">' . _l('delete') . '</a>';
+            if (staff_can('delete',  'expenses')) {
+                $categoryOutput .= ' | <a href="' . admin_url('expenses/delete/' . $aRow['id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
             }
 
             $categoryOutput .= '</div>';
             $row[] = $categoryOutput;
 
-            $total    = $aRow['amount'];
-            $tmpTotal = $total;
+            $row[]    = $aRow['currency_symbol'].' '.$aRow['total_amount'];
 
-            if ($aRow['tax'] != 0) {
-                $tax = get_tax_by_id($aRow['tax']);
-                $total += ($total / 100 * $tax->taxrate);
-            }
-            if ($aRow['tax2'] != 0) {
-                $tax = get_tax_by_id($aRow['tax2']);
-                $total += ($tmpTotal / 100 * $tax->taxrate);
-            }
+            $employeeOutput = '';
 
-            $row[] = e(app_format_money($total, $aRow['currency_name']));
-
-            $row[] = '<a href="' . admin_url('expenses/list_expenses/' . $aRow['id']) . '" onclick="init_expense(' . $aRow['id'] . ');return false;">' . e($aRow['expense_name']) . '</a>';
-
-            $outputReceipt = '';
-
-            if (! empty($aRow['file_name'])) {
-                $outputReceipt = '<a href="' . site_url('download/file/expense/' . $aRow['id']) . '">' . e($aRow['file_name']) . '</a>';
+            if ($aRow['employee'] != '0' && !empty($aRow['employee'])) {
+                $payment_mode = $this->ci->staff_model->get($aRow['employee']);
+                if ($payment_mode) {
+                    $employeeOutput = $payment_mode->firstname.' '.$payment_mode->lastname;
+                }
             }
 
-            $row[] = $outputReceipt;
+            $row[] = $employeeOutput;
 
-            $row[] = e(_d($aRow['date']));
+//            $row[] = $aRow['firstname'].' '.$aRow['lastname'];
 
-            $row[] = '<a href="' . admin_url('projects/view/' . $aRow['project_id']) . '">' . e($aRow['project_name']) . '</a>';
+//            $staff = $CI->db->where('staffid', $aRow['employee'])->get(db_prefix() . 'staff')->row_array();
 
-            $row[] = '<a href="' . admin_url('clients/client/' . $aRow['clientid']) . '">' . e($aRow['company']) . '</a>';
+            $row[] = $aRow['type'];
 
-            if ($aRow['invoiceid']) {
-                $row[] = '<a href="' . admin_url('invoices/list_invoices/' . $aRow['invoiceid']) . '">' . e(format_invoice_number($aRow['invoiceid'])) . '</a>';
-            } else {
-                $row[] = '';
-            }
-
-            $row[] = e($aRow['reference_no']);
+            $row[] = _d($aRow['date']);
 
             $paymentModeOutput = '';
 
-            if ($aRow['paymentmode'] != '0' && ! empty($aRow['paymentmode'])) {
+            if ($aRow['paymentmode'] != '0' && !empty($aRow['paymentmode'])) {
                 $payment_mode = $this->ci->payment_modes_model->get($aRow['paymentmode'], [], false, true);
                 if ($payment_mode) {
-                    $paymentModeOutput = e($payment_mode->name);
+                    $paymentModeOutput = $payment_mode->name;
                 }
             }
 
             $row[] = $paymentModeOutput;
+
+            $statusOutput = '';
+            if ($aRow['status'] == 1) {
+                $statusOutput .= '<span class="label label-success s-status invoice-status-2"> ' . _l('expense_approved') . '</span>';
+            }else{
+                $statusOutput .= '<span class="label label-danger s-status invoice-status-2"> ' . _l('expense_not_approved') . '</span>';
+            }
+
+            $row[] = $statusOutput;
 
             // Custom fields add values
             foreach ($customFieldsColumns as $customFieldColumn) {
@@ -187,19 +158,26 @@ return App_table::find('expenses')
 
             $output['aaData'][] = $row;
         }
-
         return $output;
     })->setRules([
-        App_table_filter::new('expense_name', 'TextRule')->label(_l('expense_name')),
+        App_table_filter::new('employee', 'MultiSelectRule')
+            ->label(_l('expense_employee'))
+            ->options(function ($ci) {
+                return collect($ci->expenses_model->get_employee())->map(fn ($employee) => [
+                    'value' => $employee['staffid'],
+                    'label' => $employee['firstname'].' '.$employee['lastname'],
+                ])->all();
+            }),
+//        App_table_filter::new('expense_name', 'TextRule')->label(_l('expense_name')),
         App_table_filter::new('date', 'DateRule')->label(str_replace(':', '', _l('expense_date'))),
         App_table_filter::new('year', 'MultiSelectRule')
             ->label(_l('year'))
             ->raw(function ($value, $operator) {
                 if ($operator == 'in') {
-                    return 'YEAR(date) IN (' . implode(',', $value) . ')';
+                    return "YEAR(date) IN (" . implode(',', $value) . ")";
+                } else {
+                    return "YEAR(date) NOT IN (" . implode(',', $value) . ")";
                 }
-
-                return 'YEAR(date) NOT IN (' . implode(',', $value) . ')';
             })
             ->options(function ($ci) {
                 return collect($ci->expenses_model->get_expenses_years())->map(fn ($data) => [
@@ -207,8 +185,10 @@ return App_table::find('expenses')
                     'label' => $data['year'],
                 ])->all();
             }),
-        App_table_filter::new('amount', 'NumberRule')->label(str_replace(':', '', _l('expense_amount'))),
-        App_table_filter::new('category', 'MultiSelectRule')
+        App_table_filter::new('category', 'TextRule')->label(str_replace(':', '', _l('expense_category'))),
+        App_table_filter::new('type', 'TextRule')->label(str_replace(':', '', _l('expense_type'))),
+        App_table_filter::new('total_amount', 'NumberRule')->label(str_replace(':', '', _l('expense_total_amount'))),
+        App_table_filter::new('contract_type', 'MultiSelectRule')
             ->label(_l('expense_report_category'))
             ->options(function ($ci) {
                 return collect($ci->expenses_model->get_category())->map(fn ($category) => [
@@ -216,11 +196,11 @@ return App_table::find('expenses')
                     'label' => $category['name'],
                 ])->all();
             }),
-        App_table_filter::new('billable', 'BooleanRule')->label(_l('expenses_list_billable')),
+        /*App_table_filter::new('billable', 'BooleanRule')->label(_l('expenses_list_billable')),
         App_table_filter::new('unbilled', 'BooleanRule')->label(_l('expenses_list_unbilled'))->raw(function ($value) {
-            return $value == '1' ? 'invoiceid IS NULL' : 'invoiceid IS NOT NULL';
+            return $value == "1" ? 'invoiceid IS NULL' : 'invoiceid IS NOT NULL';
         }),
-        App_table_filter::new('recurring', 'BooleanRule')->label(_l('expenses_list_recurring')),
+        App_table_filter::new('recurring', 'BooleanRule')->label(_l('expenses_list_recurring')),*/
         App_table_filter::new('paymentmode', 'SelectRule')->label(_l('payment_mode'))->options(function ($ci) {
             return collect($ci->payment_modes_model->get('', [
                 'invoices_only !=' => 1,

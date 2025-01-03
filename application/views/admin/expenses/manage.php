@@ -4,56 +4,55 @@
     <div class="content">
         <div class="row">
             <div class="col-md-12">
-                <h4 class="tw-mt-0 tw-font-bold tw-text-xl tw-mb-3">
-                    <?= _l('expenses'); ?>
-                </h4>
-                <div id="stats-top" class="tw-mb-6">
-                    <div id="expenses_total" class="empty:tw-min-h-[61px]"></div>
-                </div>
-                <div class="tw-mb-2">
-                    <div class="_buttons sm:tw-space-x-1 rtl:sm:tw-space-x-reverse">
-                        <?php if (staff_can('create', 'expenses')) { ?>
-                        <a href="<?= admin_url('expenses/expense'); ?>"
-                            class="btn btn-primary">
-                            <i class="fa-regular fa-plus"></i>
-                            <?= _l('new_expense'); ?>
-                        </a>
-                        <a href="<?= admin_url('expenses/import'); ?>"
-                            class="hidden-xs btn btn-default ">
-                            <i class="fa-solid fa-upload tw-mr-1"></i>
-                            <?= _l('import_expenses'); ?>
-                        </a>
+                <div class="tw-mb-2 sm:tw-mb-4">
+                    <div class="_buttons">
+                        <?php if (staff_can('create',  'expenses')) { ?>
+                            <a href="<?php echo admin_url('expenses/expense'); ?>" class="btn btn-primary">
+                                <i class="fa-regular fa-plus tw-mr-1"></i>
+                                <?php echo _l('new_expense'); ?>
+                            </a>
+                            <a href="<?php echo admin_url('expenses/import'); ?>" class="btn btn-primary mleft5">
+                                <i class="fa-solid fa-upload tw-mr-1"></i>
+                                <?php echo _l('import_expenses'); ?>
+                            </a>
+                            <button class="btn btn-success mleft5 store_expense_approve" disabled>
+                                <i class="fa-solid fa-check tw-mr-1"></i>
+                                <?php echo _l('expense_approve'); ?>
+                            </button>
                         <?php } ?>
-                        <?php if (staff_can('view', 'bulk_pdf_exporter')) { ?>
-                        <a href="<?= admin_url('utilities/bulk_pdf_exporter?feature=expenses'); ?>"
-                            data-toggle="tooltip"
-                            title="<?= _l('bulk_pdf_exporter'); ?>"
-                            class="btn-with-tooltip btn btn-default !tw-px-3">
-                            <i class="fa-regular fa-file-pdf"></i>
-                        </a>
-                        <?php } ?>
-                        <div id="vueApp" class="tw-inline pull-right tw-ml-0 sm:tw-ml-1.5 rtl:tw-mr-1.5 rtl:tw-ml-0">
-                            <app-filters id="<?= $table->id(); ?>"
-                                view="<?= $table->viewName(); ?>"
-                                :saved-filters="<?= $table->filtersJs(); ?>"
-                                :available-rules="<?= $table->rulesJs(); ?>">
+
+                        <div id="vueApp" class="tw-inline pull-right tw-ml-0 sm:tw-ml-1.5">
+                            <app-filters
+                                    id="<?php echo $table->id(); ?>"
+                                    view="<?php echo $table->viewName(); ?>"
+                                    :saved-filters="<?php echo $table->filtersJs(); ?>"
+                                    :available-rules="<?php echo $table->rulesJs(); ?>">
                             </app-filters>
                         </div>
-                        <a href="#" class="btn btn-default pull-right btn-with-tooltip toggle-small-view hidden-xs"
+
+                        <a href="#" onclick="slideToggle('#stats-top'); return false;"
+                           class="pull-right btn btn-default mleft5 btn-with-tooltip" data-toggle="tooltip"
+                           title="<?php echo _l('view_stats_tooltip'); ?>"><i class="fa fa-bar-chart"></i></a>
+
+                        <!--<a href="#" class="btn btn-default pull-right btn-with-tooltip toggle-small-view hidden-xs"
                             onclick="toggle_small_view('.table-expenses','#expense'); return false;"
-                            data-toggle="tooltip"
-                            title="<?= _l('invoices_toggle_table_tooltip'); ?>"><i
-                                class="fa fa-angle-double-left"></i></a>
+                            data-toggle="tooltip" title="<?php /*echo _l('invoices_toggle_table_tooltip'); */?>"><i
+                                class="fa fa-angle-double-left"></i></a>-->
+
+                        <div id="stats-top" class="hide">
+                            <hr />
+                            <div id="expenses_total"></div>
+                        </div>
 
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-12" id="small-table">
+                    <div class="col-md-12">
                         <div class="panel_s">
                             <div class="panel-body">
                                 <div class="clearfix"></div>
                                 <!-- if expenseid found in url -->
-                                <?= form_hidden('expenseid', $expenseid); ?>
+                                <?php echo form_hidden('expenseid', $expenseid); ?>
                                 <div class="panel-table-full">
                                     <?php $this->load->view('admin/expenses/table_html', ['withBulkActions' => true]); ?>
                                 </div>
@@ -74,47 +73,38 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">
-                    <?= _l('additional_action_required'); ?>
-                </h4>
+                            aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"><?php echo _l('additional_action_required'); ?></h4>
             </div>
             <div class="modal-body">
                 <div class="radio radio-primary">
                     <input type="radio" checked id="expense_convert_invoice_type_1" value="save_as_draft_false"
-                        name="expense_convert_invoice_type">
-                    <label
-                        for="expense_convert_invoice_type_1"><?= _l('convert'); ?></label>
+                           name="expense_convert_invoice_type">
+                    <label for="expense_convert_invoice_type_1"><?php echo _l('convert'); ?></label>
                 </div>
                 <div class="radio radio-primary">
                     <input type="radio" id="expense_convert_invoice_type_2" value="save_as_draft_true"
-                        name="expense_convert_invoice_type">
-                    <label
-                        for="expense_convert_invoice_type_2"><?= _l('convert_and_save_as_draft'); ?></label>
+                           name="expense_convert_invoice_type">
+                    <label for="expense_convert_invoice_type_2"><?php echo _l('convert_and_save_as_draft'); ?></label>
                 </div>
                 <div id="inc_field_wrapper">
                     <hr />
-                    <p><?= _l('expense_include_additional_data_on_convert'); ?>
-                    </p>
-                    <p><b><?= _l('expense_add_edit_description'); ?>
-                            +</b></p>
+                    <p><?php echo _l('expense_include_additional_data_on_convert'); ?></p>
+                    <p><b><?php echo _l('expense_add_edit_description'); ?> +</b></p>
                     <div class="checkbox checkbox-primary inc_note">
                         <input type="checkbox" id="inc_note">
-                        <label
-                            for="inc_note"><?= _l('expense'); ?>
-                            <?= _l('expense_add_edit_note'); ?></label>
+                        <label for="inc_note"><?php echo _l('expense'); ?>
+                            <?php echo _l('expense_add_edit_note'); ?></label>
                     </div>
                     <div class="checkbox checkbox-primary inc_name">
                         <input type="checkbox" id="inc_name">
-                        <label
-                            for="inc_name"><?= _l('expense'); ?>
-                            <?= _l('expense_name'); ?></label>
+                        <label for="inc_name"><?php echo _l('expense'); ?> <?php echo _l('expense_name'); ?></label>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary"
-                    id="expense_confirm_convert"><?= _l('confirm'); ?></button>
+                        id="expense_confirm_convert"><?php echo _l('confirm'); ?></button>
             </div>
         </div>
         <!-- /.modal-content -->
@@ -129,9 +119,8 @@
 <script>
     Dropzone.autoDiscover = false;
     $(function() {
-        initDataTable('.table-expenses', admin_url + 'expenses/table', [0], [0], {},
-                <?= hooks()->apply_filters('expenses_table_default_order', json_encode([6, 'desc'])); ?>
-            )
+        var table = initDataTable('.table-expenses', admin_url + 'expenses/table', [0], [0], {},
+            <?php echo hooks()->apply_filters('expenses_table_default_order', json_encode([6, 'desc'])); ?>)
             .column(1).visible(false, false).columns.adjust();
 
         init_expense();
@@ -143,10 +132,8 @@
                 $('#inc_field_wrapper').addClass('hide');
             } else {
                 $('#inc_field_wrapper').removeClass('hide');
-                emptyNote === '1' && $('.inc_note').addClass('hide') || $('.inc_note').removeClass(
-                    'hide')
-                emptyName === '1' && $('.inc_name').addClass('hide') || $('.inc_name').removeClass(
-                    'hide')
+                emptyNote === '1' && $('.inc_note').addClass('hide') || $('.inc_note').removeClass('hide')
+                emptyName === '1' && $('.inc_name').addClass('hide') || $('.inc_name').removeClass('hide')
             }
         });
 
@@ -160,6 +147,35 @@
             window.location.href = buildUrl(admin_url + 'expenses/convert_to_invoice/' + $('body').find(
                 '.expense_convert_btn').attr('data-id'), parameters);
         });
+    });
+    $(document).on('click', '.store_expense_approve', function(e) {
+        var approve = [];
+        $.each($("input[name='approve[]']:checked"), function () {
+            approve.push($(this).val());
+        });
+        // console.log(approve);
+        if(approve != ""){
+            e.preventDefault();
+            $.ajax({
+                type: "post",
+                url: "<?php echo base_url('admin/Expenses/approve_expense'); ?>",
+                data: {
+                    id: approve
+                },
+                success: function(response) {
+                    window.location.reload();
+                }
+            });
+        }
+    });
+
+    $(document).on('click', '#expense_approve,#mass_select_all', function(e) {
+        var checked = $(this).prop("checked");
+        if(checked){
+            $(".store_expense_approve").prop("disabled", false);
+        }else{
+            $(".store_expense_approve").prop("disabled", true);
+        }
     });
 </script>
 </body>

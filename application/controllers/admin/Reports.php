@@ -1122,6 +1122,7 @@ class Reports extends AdminController
                     'currencies'=>$data['currencies'],
                 ]);
             }
+            $data['expenses_data'] = $this->db->get('tblexpenses')->result();
 
             $this->load->view('admin/reports/expenses_detailed', $data);
         } else {
